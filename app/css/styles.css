@@ -69,7 +69,7 @@ a { color: var(--primary); }
 
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 main:focus, #board:focus, .result:focus { outline: none; }
-#board:focus-visible .row-current { outline: 2px dashed var(--focus); outline-offset: 4px; border-radius: 6px; }
+#board:focus-visible .row-current { outline: 2px solid color-mix(in srgb, var(--focus) 35%, transparent); outline-offset: 4px; border-radius: 6px; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -259,7 +259,9 @@ a.door:hover { transform: translateY(-2px); border-color: var(--primary); }
 .back-link {
   display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--surface); text-decoration: none; font-weight: 600;
+  white-space: nowrap; flex: none;
 }
+.game-title-wrap { min-width: 0; }
 .game-title { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; margin: 0; }
 .game-meta { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
 .topic {
