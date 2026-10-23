@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" width="160" height="32" role="img" aria-label="Platzhalter-Logo">
+  <!-- Platzhalter: durch das Logo der Bank ersetzen (Pfad in js/config.js) -->
+  <rect x="0" y="0" width="32" height="32" rx="7" fill="#ffffff" fill-opacity="0.16"/>
+  <path d="M16 6.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.7z" fill="#e2b45a"/>
+  <text x="42" y="21.5" font-family="Georgia, 'Times New Roman', serif" font-size="17" fill="#ffffff">Musterbank</text>
+</svg>

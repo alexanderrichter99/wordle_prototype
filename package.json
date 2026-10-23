@@ -1,0 +1,15 @@
+{
+  "name": "wordle-adventskalender",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Statischer Wordle-Adventskalender für das Intranet. Keine Laufzeit-Abhängigkeiten.",
+  "scripts": {
+    "start": "npx --yes http-server app -p 8080 -c-1",
+    "test": "node --test tests/logic.test.js",
+    "test:e2e": "node --test tests/e2e/browser.test.js",
+    "build:single": "node tools/build-single.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
