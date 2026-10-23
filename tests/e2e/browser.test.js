@@ -54,7 +54,7 @@ async function tileStates(page, row) {
 
 test("Kalender sperrt zukünftige Türchen, auch per Direktlink", opts, async () => {
   const { context, page, external, errors } = await newPage();
-  await page.goto(APP + "?test=1&datum=2026-12-05");
+  await page.goto(APP + "?test=1&datum=2026-10-05");
   assert.equal(await page.locator("#calendar a.door").count(), 5);
   assert.equal(await page.locator('#calendar .door[data-status="locked"]').count(), 19);
   assert.match(await page.textContent("#today-card"), /Türchen 5 ist geöffnet/);
@@ -62,10 +62,10 @@ test("Kalender sperrt zukünftige Türchen, auch per Direktlink", opts, async ()
   const html = await page.content();
   assert.ok(!html.includes("DANKE"), "Lösung eines gesperrten Türchens im DOM");
 
-  await page.goto(APP + "?test=1&datum=2026-12-05#/tag/10");
+  await page.goto(APP + "?test=1&datum=2026-10-05#/tag/10");
   assert.equal(await page.isVisible("#view-home"), true);
   assert.equal(await page.isVisible("#view-game"), false);
-  assert.match(await page.textContent("#toast"), /öffnet sich am 10\. Dezember/);
+  assert.match(await page.textContent("#toast"), /öffnet sich am 10\. Oktober/);
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "kalender-desktop.png"), fullPage: true });
   assert.deepEqual(external, []);
   assert.deepEqual(errors, []);
@@ -92,7 +92,7 @@ test("Spielen per physischer Tastatur, Fehlermeldung, Gewinn und Wiederherstellu
   await typeWord(page, "kerze");
   assert.equal(await page.isVisible("#result"), true);
   assert.match(await page.textContent("#result-title"), /Hervorragend/);
-  assert.match(await page.textContent("#result-fact-text"), /Adventskranz/);
+  assert.match(await page.textContent("#result-fact-text"), /Bienenwachs/);
   assert.match(await page.textContent("#result-status"), /Türchen 2 ist abgeschlossen/);
   assert.equal(await page.isVisible("#keyboard"), false);
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "ergebnis.png"), fullPage: true });
@@ -139,17 +139,17 @@ test("Umlaute und ß über die Tastatur", opts, async () => {
 });
 
 test("Echtes Datum: Freischaltung nach deutscher Zeit, auch bei anderer Rechner-Zeitzone", opts, async () => {
-  // 30.11. 23:30 UTC = 1.12. 00:30 in Berlin, aber noch 30.11. in New York
+  // 30.9. 22:30 UTC = 1.10. 00:30 in Berlin (Sommerzeit), aber noch 30.9. in New York
   const { context, page, errors } = await newPage({ timezoneId: "America/New_York" });
-  await page.clock.setFixedTime(new Date("2026-11-30T23:30:00Z"));
+  await page.clock.setFixedTime(new Date("2026-09-30T22:30:00Z"));
   await page.goto(APP);
   assert.equal(await page.locator("#calendar a.door").count(), 1);
   assert.equal(await page.isVisible("#test-banner"), false);
 
-  await page.clock.setFixedTime(new Date("2026-11-30T22:30:00Z")); // 23:30 in Berlin
+  await page.clock.setFixedTime(new Date("2026-09-30T21:30:00Z")); // 23:30 in Berlin
   await page.reload();
   assert.equal(await page.locator("#calendar a.door").count(), 0);
-  assert.match(await page.textContent("#today-card"), /1\. Dezember 2026/);
+  assert.match(await page.textContent("#today-card"), /1\. Oktober 2026/);
   assert.deepEqual(errors, []);
   await context.close();
 });
@@ -161,7 +161,7 @@ test("Ohne Browserspeicher bleibt das Spiel bedienbar", opts, async () => {
   });
   await page.goto(APP + "?test=1#/tag/3");
   assert.equal(await page.isVisible("#storage-note"), true);
-  await typeWord(page, "daten");
+  await typeWord(page, "börse");
   assert.equal(await page.isVisible("#result"), true);
   assert.deepEqual(errors, []);
   await context.close();
@@ -169,18 +169,58 @@ test("Ohne Browserspeicher bleibt das Spiel bedienbar", opts, async () => {
 
 test("Smartphone: kein horizontales Scrollen, Tastatur sichtbar", opts, async () => {
   const { context, page, errors } = await newPage({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
-  await page.clock.setFixedTime(new Date("2026-12-10T08:00:00Z"));
+  await page.clock.setFixedTime(new Date("2026-10-10T08:00:00Z"));
   await page.goto(APP);
   let overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   assert.ok(overflow <= 0, "Startseite zu breit: " + overflow);
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "kalender-mobil.png"), fullPage: true });
-  await page.goto(APP + "#/tag/4");
+  await page.goto(APP + "#/tag/3"); // BÖRSE
   overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   assert.ok(overflow <= 0, "Spielansicht zu breit: " + overflow);
   const kb = await page.locator("#keyboard").boundingBox();
   assert.ok(kb && kb.y + kb.height <= 740 + 1, "Tastatur nicht vollständig sichtbar");
   await typeWord(page, "börse");
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "spiel-mobil.png") });
+  assert.deepEqual(errors, []);
+  await context.close();
+});
+
+test("Thema wird im Spiel nicht angezeigt", opts, async () => {
+  const { context, page, errors } = await newPage();
+  await page.goto(APP + "?test=1&datum=2026-10-05");
+  assert.doesNotMatch(await page.textContent("#today-card"), /Thema/);
+  await page.goto(APP + "?test=1#/tag/5");
+  assert.equal(await page.isVisible("#game-topic"), false);
+  assert.doesNotMatch(await page.textContent(".game-meta"), /Thema|Banking/);
+  assert.deepEqual(errors, []);
+  await context.close();
+});
+
+test("Nach allen 24 Türchen erscheinen Glückwunsch und Weihnachtsgrüße", opts, async () => {
+  const { context, page, errors } = await newPage();
+  // 23 Türchen als gelöst vorbelegen (Test-Spielstand des Oktober-Probelaufs)
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("seeded")) return;
+    sessionStorage.setItem("seeded", "1");
+    const days = {};
+    const words = ["KONTO","KERZE","BÖRSE","KRANZ","AKTIE","STERN","MÜNZE","KEKSE","SALDO","TANNE","FONDS","ENGEL","KASSE","NÜSSE","RENTE","LICHT","KARTE","MARKT","INDEX","PAKET","FROST","GABEN","GRÜßE"];
+    words.forEach((w, i) => { days[i + 1] = { guesses: [w] }; });
+    localStorage.setItem("adventskalender-2026-10-test", JSON.stringify({ version: 1, days }));
+  });
+  await page.goto(APP + "?test=1");
+  assert.match(await page.textContent("#progress-count"), /23 von 24/);
+  assert.equal(await page.locator(".finale").count(), 0);
+
+  await page.goto(APP + "?test=1#/tag/24");
+  await typeWord(page, "danke");
+  assert.match(await page.textContent("#result-next"), /zum Abschluss/);
+  await page.click("#result-next");
+  assert.equal(await page.isVisible(".finale"), true);
+  const text = await page.textContent("#today-card");
+  assert.match(text, /Herzlichen Glückwunsch/);
+  assert.match(text, /24 von 24 Wörtern erraten/);
+  assert.match(text, /frohe Weihnachten/);
+  if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "abschluss.png") });
   assert.deepEqual(errors, []);
   await context.close();
 });

@@ -120,18 +120,19 @@
 
   /*
    * Höchstes freigeschaltetes Türchen (0 bis 24) für ein Kalenderdatum.
-   * Vor Dezember des Aktionsjahres: 0. Ab 24.12. und danach: 24.
+   * month ist der Aktionsmonat (1–12, Standard 12 = Dezember).
+   * Vor dem Aktionsmonat: 0. Ab dem 24. und danach: 24.
    */
-  function unlockedUpTo(today, year) {
-    if (today.year < year) return 0;
-    if (today.year > year) return 24;
-    if (today.month < 12) return 0;
+  function unlockedUpTo(today, year, month) {
+    month = month || 12;
+    if (today.year !== year) return today.year < year ? 0 : 24;
+    if (today.month !== month) return today.month < month ? 0 : 24;
     return Math.min(today.day, 24);
   }
 
-  function isUnlocked(day, today, year, testMode) {
+  function isUnlocked(day, today, year, testMode, month) {
     if (testMode) return day >= 1 && day <= 24;
-    return day >= 1 && day <= unlockedUpTo(today, year);
+    return day >= 1 && day <= unlockedUpTo(today, year, month);
   }
 
   // ---------- Spielstand ----------

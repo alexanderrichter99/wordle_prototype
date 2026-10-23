@@ -3,37 +3,54 @@
  * Diese Datei ist die einzige Stelle, die für Branding und Spielregeln angepasst werden muss.
  */
 window.ADVENT_CONFIG = {
-  // Branding (neutrale Platzhalter)
-  bankName: "Musterbank",
+  // Branding
+  bankName: "BayernLB",
   title: "Der digitale Adventskalender",
-  subtitle: "Jeden Tag ein neues Worträtsel vom 1. bis 24. Dezember",
-  // Pfad zu einer Logo-Datei (SVG/PNG) relativ zu index.html, oder "" für das Textlogo.
-  logo: "assets/logo.svg",
+  // Leer lassen, um den Untertitel aus Monat und Jahr zu erzeugen ("Vom 1. bis 24. Oktober …").
+  subtitle: "",
+  // Pfad zu einer Logo-Datei (SVG/PNG) relativ zu index.html, oder "" für ein Textlogo aus bankName.
+  // Das offizielle Logo bitte aus dem Corporate-Design-Portal übernehmen, nicht nachbauen.
+  logo: "",
+
+  // Erscheinungsbild: "bayernlb" (sachlich, kantig, links ausgerichtet) oder "standard" (weicher, festlicher)
+  theme: "bayernlb",
 
   // Unternehmensfarben. Alle anderen Farben leiten sich davon ab.
+  // Die Werte für "bayernlb" sind an den Webauftritt angelehnt und geschätzt;
+  // vor dem Einsatz durch die offiziellen Werte aus dem Corporate Design ersetzen.
   colors: {
-    primary: "#0b3d6b", // Hauptfarbe (Kopfzeile, Buttons)
-    accent: "#b8862b", // Weihnachtlicher Akzent (Sterne, Hervorhebungen)
-    correct: "#2e7d4f", // Buchstabe an richtiger Stelle
-    present: "#c9a227", // Buchstabe kommt vor, falsche Stelle
-    absent: "#6b7280" // Buchstabe kommt nicht vor
+    primary: "#00305e", // Hauptfarbe (Kopfzeile, Buttons, Überschriften)
+    accent: "#0a7cc1", // Akzent (Hervorhebungen, aktuelles Türchen)
+    correct: "#1f7a4d", // Buchstabe an richtiger Stelle
+    present: "#d4a72c", // Buchstabe kommt vor, falsche Stelle
+    absent: "#6b7480" // Buchstabe kommt nicht vor
   },
 
-  // Spielregeln
-  year: 2026, // Jahr der Aktion (Dezember dieses Jahres)
-  maxAttempts: 6, // Anzahl Versuche je Rätsel
-  wordLength: 5, // Erwartete Wortlänge; wird beim Laden gegen puzzles.js geprüft
+  // Zeitraum: Türchen 1 bis 24 öffnen sich am 1. bis 24. Tag dieses Monats.
+  // 12 = Dezember (regulär), 10 = Oktober (Probelauf).
+  year: 2026,
+  month: 10,
   timeZone: "Europe/Berlin",
 
+  // Spielregeln
+  maxAttempts: 6, // Anzahl Versuche je Rätsel
+  wordLength: 5, // Erwartete Wortlänge; wird beim Laden gegen puzzles.js geprüft
+  showTopic: false, // Themenhinweis (topic aus puzzles.js) im Spiel anzeigen
+
   // Optionale Liste erlaubter Rateversuche (Großbuchstaben). null = jede Buchstabenfolge erlaubt.
-  // Beispiel: allowedWords: ["KONTO", "KASSE", ...]
   allowedWords: null,
 
-  // Testmodus: Aufruf mit ?test=1 schaltet alle Türchen frei,
-  // ?test=1&datum=2026-12-10 simuliert ein Datum.
+  // Testmodus: ?test=1 öffnet alle Türchen, ?test=1&datum=2026-10-10 simuliert ein Datum.
   // Für den Produktivbetrieb auf false setzen.
   allowTestMode: true,
 
-  // Hinweis im Fuß der Seite (z. B. Ansprechpartner der Aktion)
+  // Abschluss, sobald alle 24 Türchen gespielt sind
+  finale: {
+    title: "Herzlichen Glückwunsch!",
+    text: "Du hast alle 24 Türchen geöffnet. Danke fürs Mitraten! Wir wünschen dir und deinen Liebsten frohe Weihnachten, erholsame Feiertage und einen guten Start ins neue Jahr.",
+    signature: "Deine BayernLB"
+  },
+
+  // Hinweis im Fuß der Seite
   footerNote: "Eine Aktion für alle Kolleginnen und Kollegen. Dein Spielstand bleibt in deinem Browser."
 };
