@@ -44,7 +44,9 @@ Die Skripte sind bewusst klassische Skripte (keine ES-Module), damit die App auc
 
 ## Wichtige fachliche Regeln
 
-- **Freischaltung:** Türchen *n* ist ab dem *n*. Dezember 00:00 Uhr deutscher Zeit (Europe/Berlin) spielbar. Nach dem 24. Dezember bleiben alle Türchen offen. Vor dem 1. Dezember ist alles gesperrt.
+- **Freischaltung:** Türchen *n* ist ab dem *n*. Tag des Aktionsmonats 00:00 Uhr deutscher Zeit (Europe/Berlin) spielbar, regulär im Dezember (`month` in `config.js`, für den Probelauf Oktober). Nach dem 24. bleiben alle Türchen offen, davor ist alles gesperrt.
+- **Abschluss:** Sind alle 24 Türchen gespielt (gelöst oder aufgelöst), zeigt die Startseite einen Glückwunsch mit Weihnachtsgrüßen.
+- **Themenhinweis:** Jedes Rätsel hat eine Kategorie für die Pflege; im Spiel ist sie ausgeblendet, weil sie die Lösung zu stark eingrenzt.
 - **Gesperrte Türchen** sind sichtbar, aber nicht anklickbar; auch ein direkter Link (`#/tag/20`) wird abgefangen.
 - **Auswertung** in zwei Durchläufen: erst exakte Treffer (grün), dann vorhandene Buchstaben (gelb) nur so oft, wie sie im Lösungswort noch übrig sind. Doppelte Buchstaben werden dadurch korrekt behandelt.
 - **Umlaute und ß** sind eigene Buchstaben (Ä ≠ A). ß wird nicht zu „SS“ umgewandelt.
@@ -80,8 +82,8 @@ Falls später eine Rangliste gewünscht ist, ist der datenschutzfreundlichste We
 Diese Punkte beeinflussen die Umsetzung, sind aber mit Annahmen vorbelegt und in `config.js` änderbar:
 
 1. **Hosting-Weg** – hängt von der IT ab (siehe README, Abschnitt „Interne Bereitstellung“). Annahme: vorhandener interner Webserver.
-2. **Jahr** – vorbelegt mit 2026.
+2. **Zeitraum** – vorbelegt mit Oktober 2026 als Probelauf; für die Aktion `month: 12`.
 3. **Wortlänge** – 5 Buchstaben, 6 Versuche. Jedes Rätsel kann eine eigene Länge haben; das Raster passt sich an.
 4. **Wortprüfung gegen Wörterbuch** – aus (jede Buchstabenfolge erlaubt). Mit eigener Liste aktivierbar.
-5. **Corporate Design** – neutrale Platzhalter („Musterbank“, Platzhalterlogo, Blau/Grün).
+5. **Corporate Design** – Erscheinungsbild an den Webauftritt der BayernLB angelehnt (Textlogo, geschätzte Farben, Systemschrift). Offizielles Logo, Farbwerte und ggf. Hausschrift (lokal eingebunden, ohne externe Quellen) kommen aus dem Corporate Design.
 6. **Gewinnspiel?** – Falls ja, ist ein Backend nötig (siehe „Grenzen“).

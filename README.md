@@ -1,6 +1,8 @@
 # Der digitale Adventskalender
 
-Ein Wordle-Adventskalender für Mitarbeitende: vom 1. bis 24. Dezember öffnet sich täglich ein neues Worträtsel rund um Banking, Wirtschaft, IT-Sicherheit, Digitalisierung, Nachhaltigkeit, Unternehmenskultur und Weihnachten.
+Ein Wordle-Adventskalender für Mitarbeitende: vom 1. bis 24. Dezember öffnet sich täglich ein neues Worträtsel rund um Banking, Advent und Weihnachten.
+
+> **Aktueller Stand: Probelauf im Oktober.** In `app/js/config.js` steht `month: 10`, die Türchen öffnen sich also am 1. bis 24. Oktober 2026. Für die eigentliche Aktion auf `month: 12` umstellen.
 
 Die App ist eine **rein statische Webanwendung** (HTML, CSS, JavaScript). Sie braucht keinen Server-Code, keine Datenbank, keine Benutzerkonten und lädt keine externen Ressourcen. Der Spielstand bleibt im Browser der Spielenden.
 
@@ -8,12 +10,14 @@ Hintergrund und Architekturentscheidung: [docs/KONZEPT.md](docs/KONZEPT.md)
 
 ## Funktionen
 
-- 24 Türchen, freigeschaltet nach deutscher Zeit (Europe/Berlin); zukünftige Türchen sind sichtbar, aber gesperrt (auch per Direktlink)
+- 24 Türchen, freigeschaltet nach deutscher Zeit (Europe/Berlin) im konfigurierten Monat; zukünftige Türchen sind sichtbar, aber gesperrt (auch per Direktlink)
 - Wordle-Mechanik mit korrekter Behandlung doppelter Buchstaben, Umlaute Ä/Ö/Ü und ß
 - Bildschirmtastatur (QWERTZ) und physische Tastatur (Buchstaben, Enter, Rücktaste, Esc = zurück)
 - Farbrückmeldung zusätzlich mit Symbolen (✓ richtige Stelle, ↔ andere Stelle, ✕ nicht enthalten) und Textansagen für Screenreader
 - Ergebnisansicht mit Lösungswort und Fun Fact (erst nach Abschluss sichtbar)
 - Fortschritt, Statistik und Verteilung der benötigten Versuche
+- Glückwunsch mit Weihnachtsgrüßen, sobald alle 24 Türchen gespielt sind
+- Zwei Erscheinungsbilder: `bayernlb` (sachlich, kantig, an den Webauftritt der BayernLB angelehnt) und `standard`
 - Spielstand im `localStorage`; funktioniert auch, wenn der Browser keine Speicherung erlaubt
 - Responsiv (Smartphone bis Desktop), Hell- und Dunkelmodus, reduzierte Animationen bei entsprechender Systemeinstellung
 - Testmodus zum Ausprobieren außerhalb der Adventszeit
@@ -63,7 +67,7 @@ Solange in `config.js` `allowTestMode: true` steht:
 | Adresse | Wirkung |
 |---|---|
 | `index.html?test=1` | Alle 24 Türchen offen |
-| `index.html?test=1&datum=2026-12-10` | Verhält sich wie am 10. Dezember 2026 |
+| `index.html?test=1&datum=2026-10-10` | Verhält sich wie am 10. Oktober 2026 |
 
 Im Testmodus wird ein **separater** Spielstand verwendet, der sich über das Banner zurücksetzen lässt. **Vor dem Produktivgang `allowTestMode: false` setzen**, sonst kann jeder mit `?test=1` alle Türchen öffnen.
 
@@ -75,27 +79,31 @@ Alles Anpassbare steht in zwei Dateien:
 
 | Einstellung | Bedeutung |
 |---|---|
-| `bankName`, `title`, `subtitle`, `footerNote` | Texte |
-| `logo` | Pfad zur Logo-Datei (SVG/PNG) oder `""` für ein Textlogo |
-| `colors.primary`, `colors.accent` | Unternehmensfarben |
+| `bankName`, `title`, `subtitle`, `footerNote` | Texte (`subtitle` leer = automatisch aus Monat) |
+| `logo` | Pfad zur Logo-Datei (SVG/PNG) oder `""` für ein Textlogo aus `bankName` |
+| `theme` | `"bayernlb"` (sachlich, kantig, links ausgerichtet) oder `"standard"` (weicher, festlicher) |
+| `colors.primary`, `colors.accent` | Unternehmensfarben. Die eingetragenen BayernLB-Werte sind angelehnt und geschätzt; bitte durch die offiziellen Werte aus dem Corporate Design ersetzen |
 | `colors.correct`, `colors.present`, `colors.absent` | Farben der Rückmeldung (auf ausreichenden Kontrast achten) |
-| `year` | Jahr der Aktion |
+| `year`, `month` | Jahr und Monat der Aktion (`12` = Dezember, `10` = Oktober-Probelauf). Jeder Monat hat einen eigenen Spielstand |
 | `maxAttempts` | Versuche je Rätsel (Standard 6) |
 | `wordLength` | Erwartete Wortlänge; `null`, wenn Rätsel unterschiedlich lang sein sollen |
+| `showTopic` | Themenhinweis aus `puzzles.js` im Spiel anzeigen (Standard: `false`, damit er die Lösung nicht verrät) |
+| `finale.title`, `finale.text`, `finale.signature` | Glückwunschtext nach allen 24 Türchen |
 | `allowedWords` | Optional: Liste erlaubter Rateversuche; `null` = jede Buchstabenfolge |
 | `allowTestMode` | Testmodus per URL erlauben |
 
-**`app/js/puzzles.js`**: ein Eintrag je Tag mit `word` (Großbuchstaben, Ä/Ö/Ü/ß erlaubt), `topic` (vor dem Spiel sichtbar) und `fact` (nach dem Spiel sichtbar). Das Raster passt sich an die Länge des Lösungsworts an. Fehler in der Liste (fehlender Tag, doppeltes Wort, falsche Länge) zeigt die App beim Laden als roten Hinweis an, und `npm test` prüft sie ebenfalls.
+**`app/js/puzzles.js`**: ein Eintrag je Tag mit `word` (Großbuchstaben, Ä/Ö/Ü/ß erlaubt), `topic` (Kategorie für die Pflege, im Spiel nur mit `showTopic: true` sichtbar) und `fact` (nach dem Spiel sichtbar). Das Raster passt sich an die Länge des Lösungsworts an. Fehler in der Liste (fehlender Tag, doppeltes Wort, falsche Länge) zeigt die App beim Laden als roten Hinweis an, und `npm test` prüft sie ebenfalls.
 
 Die Rätsel eines Jahres sollten **vor dem 1. Dezember** feststehen. Wer ein Wort nachträglich ändert, macht bereits gespeicherte Versuche dieses Tages unbrauchbar (sie werden dann neu ausgewertet).
 
 ## Tests
 
 ```bash
-npm test             # 18 Unit-Tests: Auswertung, doppelte Buchstaben, Umlaute/ß, Datum Europe/Berlin, Freischaltung, Speicherung, Rätselliste
+npm test             # 19 Unit-Tests: Auswertung, doppelte Buchstaben, Umlaute/ß, Datum Europe/Berlin, Freischaltung, Speicherung, Rätselliste
 npm install          # einmalig, nur für Browser-Tests
 npx playwright install chromium
-npm run test:e2e     # 7 Browser-Tests: Sperren inkl. Direktlink, Spielen per Tastatur und Bildschirmtastatur,
+npm run test:e2e     # 9 Browser-Tests: Sperren inkl. Direktlink, Spielen per Tastatur und Bildschirmtastatur, Abschluss,
+                     # verborgenes Thema,
                      # Gewinnen/Verlieren, Wiederherstellung nach Neuladen, Zeitzone, ohne Speicher, Smartphone,
                      # keine externen Netzwerkzugriffe, keine JavaScript-Fehler
 ```
@@ -110,7 +118,7 @@ Manuell zusätzlich empfohlen vor dem Start: einmal in Edge, Chrome, Firefox und
 
 ### Schritte bis zum Link im Intranet
 
-1. **Inhalte finalisieren:** Bankname, Logo, Farben in `config.js`; Rätsel prüfen; `allowTestMode: false`; `year` prüfen.
+1. **Inhalte finalisieren:** Logo und offizielle Farben in `config.js`; Rätsel prüfen; `allowTestMode: false`; `year` und `month` prüfen.
 2. **Tests laufen lassen** (`npm test`, optional `npm run test:e2e`).
 3. **IT-Ticket stellen** (siehe Abschnitt „Was die IT benötigt“) mit dem Inhalt von `app/` als ZIP.
 4. **IT stellt bereit:** Dateien in ein Webverzeichnis kopieren, internen DNS-Namen bzw. Pfad einrichten, TLS-Zertifikat aus der internen PKI, Zugriff nur aus dem internen Netz.

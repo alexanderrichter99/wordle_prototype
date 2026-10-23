@@ -10,6 +10,10 @@
   var PUZZLES = (window.ADVENT_PUZZLES || []).slice().sort(function (a, b) { return a.day - b.day; });
   var MAX = CONFIG.maxAttempts || 6;
   var YEAR = CONFIG.year || new Date().getFullYear();
+  var MONTH = CONFIG.month >= 1 && CONFIG.month <= 12 ? CONFIG.month : 12;
+  var MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+  var MONTH_NAME = MONTH_NAMES[MONTH - 1];
+  var MONTH_SHORT = MONTH_NAME.length > 4 ? MONTH_NAME.slice(0, 3) + "." : MONTH_NAME;
   var ALLOWED = Array.isArray(CONFIG.allowedWords)
     ? CONFIG.allowedWords.map(L.normalizeWord).filter(Boolean)
     : null;
@@ -44,7 +48,8 @@
     storage = null;
   }
   // Der Testmodus speichert getrennt, damit Tests den echten Spielstand nicht verändern.
-  var storageYear = testMode ? YEAR + "-test" : YEAR;
+  // Ein anderer Aktionsmonat (z. B. Probelauf im Oktober) bekommt einen eigenen Spielstand.
+  var storageYear = YEAR + (MONTH !== 12 ? "-" + MONTH : "") + (testMode ? "-test" : "");
   var progress = L.loadProgress(storage, storageYear);
 
   function persist() {
@@ -66,7 +71,7 @@
   }
 
   function unlocked(day) {
-    return unlockAll || L.isUnlocked(day, today(), YEAR, false);
+    return unlockAll || L.isUnlocked(day, today(), YEAR, false, MONTH);
   }
 
   function wordLength(p) {
@@ -113,7 +118,8 @@
     }
     $("brand-mark").textContent = name.charAt(0) || "★";
     $("home-title").textContent = CONFIG.title || "Der digitale Adventskalender";
-    $("home-subtitle").textContent = CONFIG.subtitle || "";
+    $("home-subtitle").textContent = CONFIG.subtitle || ("Vom 1. bis 24. " + MONTH_NAME + " jeden Tag ein neues Worträtsel");
+    document.documentElement.setAttribute("data-style", CONFIG.theme === "standard" ? "standard" : "bayernlb");
     $("footer-note").textContent = CONFIG.footerNote || "";
     $("howto-attempts").textContent = MAX;
     document.title = (CONFIG.title || "Adventskalender") + (name ? " · " + name : "");
@@ -143,7 +149,7 @@
 
   function renderHome() {
     var t = today();
-    var upTo = unlockAll ? 24 : L.unlockedUpTo(t, YEAR);
+    var upTo = unlockAll ? 24 : L.unlockedUpTo(t, YEAR, MONTH);
     var sum = L.summary(progress, PUZZLES, MAX);
     var done = sum.solved + sum.lost;
 
@@ -153,12 +159,13 @@
     $("progress-bar").setAttribute("aria-valuetext", done + " von 24 Rätseln abgeschlossen");
     $("progress-fill").style.width = (done / 24 * 100) + "%";
 
-    renderTodayCard(t, upTo);
+    if (done === 24) renderFinale(sum);
+    else renderTodayCard(t, upTo);
 
     // Kalender
     var cal = $("calendar");
     cal.textContent = "";
-    var currentDay = (t.year === YEAR && t.month === 12 && t.day <= 24) ? t.day : null;
+    var currentDay = (t.year === YEAR && t.month === MONTH && t.day <= 24) ? t.day : null;
     for (var day = 1; day <= 24; day++) {
       var p = puzzleFor(day);
       var li = el("li", "door-item");
@@ -171,8 +178,8 @@
       var label = el("span", "door-label");
       var aria = "Türchen " + day + ": ";
       if (!open) {
-        label.textContent = "🔒 " + day + ". Dez.";
-        aria += "noch gesperrt, öffnet am " + day + ". Dezember";
+        label.textContent = "🔒 " + day + ". " + MONTH_SHORT;
+        aria += "noch gesperrt, öffnet am " + day + ". " + MONTH_NAME;
         door.setAttribute("aria-disabled", "true");
         door.setAttribute("role", "img");
       } else {
@@ -217,21 +224,22 @@
   function renderTodayCard(t, upTo) {
     var card = $("today-card");
     card.textContent = "";
+    card.classList.remove("finale");
     var text = el("div", "today-text");
     var action = null;
 
     if (upTo === 0) {
-      var first = new Date(Date.UTC(YEAR, 11, 1));
+      var first = new Date(Date.UTC(YEAR, MONTH - 1, 1));
       var now = new Date(Date.UTC(t.year, t.month - 1, t.day));
       var daysLeft = Math.round((first - now) / 86400000);
       text.appendChild(el("p", "today-kicker", "Bald geht es los"));
-      text.appendChild(el("p", "today-main", "Das erste Türchen öffnet sich am 1. Dezember " + YEAR + "."));
+      text.appendChild(el("p", "today-main", "Das erste Türchen öffnet sich am 1. " + MONTH_NAME + " " + YEAR + "."));
       text.appendChild(el("p", "today-sub", daysLeft === 1 ? "Nur noch 1 Tag." : "Noch " + daysLeft + " Tage."));
     } else {
       // Heute = höchstes freigeschaltetes Türchen; danach das erste offene, noch nicht beendete.
       var target = puzzleFor(upTo);
       var targetStatus = target ? statusFor(target) : "new";
-      var afterAdvent = !unlockAll && (t.year > YEAR || t.day > 24);
+      var afterAdvent = !unlockAll && L.unlockedUpTo(t, YEAR, MONTH) === 24 && !(t.year === YEAR && t.month === MONTH && t.day === 24);
       if (unlockAll || afterAdvent || targetStatus === "won" || targetStatus === "lost") {
         var pending = null;
         for (var d = 1; d <= upTo; d++) {
@@ -239,7 +247,7 @@
           if (p && (statusFor(p) === "new" || statusFor(p) === "playing")) { pending = p; break; }
         }
         if (unlockAll || afterAdvent) {
-          text.appendChild(el("p", "today-kicker", unlockAll ? "Testmodus" : "Frohe Weihnachten!"));
+          text.appendChild(el("p", "today-kicker", unlockAll ? "Testmodus" : "Alle Türchen offen"));
           text.appendChild(el("p", "today-main", "Alle 24 Türchen sind geöffnet."));
         } else {
           text.appendChild(el("p", "today-kicker", "Türchen " + upTo));
@@ -250,9 +258,9 @@
           action = { href: "#/tag/" + pending.day, label: (statusFor(pending) === "playing" ? "Weiterspielen: Türchen " : "Nachholen: Türchen ") + pending.day };
         }
       } else {
-        text.appendChild(el("p", "today-kicker", "Heute, " + t.day + ". Dezember"));
+        text.appendChild(el("p", "today-kicker", "Heute, " + t.day + ". " + MONTH_NAME));
         text.appendChild(el("p", "today-main", "Türchen " + upTo + " ist geöffnet."));
-        text.appendChild(el("p", "today-sub", "Thema: " + target.topic));
+        if (CONFIG.showTopic && target.topic) text.appendChild(el("p", "today-sub", "Thema: " + target.topic));
         action = { href: "#/tag/" + upTo, label: targetStatus === "playing" ? "Weiterspielen" : "Rätsel von heute spielen" };
       }
     }
@@ -265,6 +273,25 @@
     }
   }
 
+  // Abschluss, sobald alle 24 Türchen gespielt sind.
+  function renderFinale(sum) {
+    var f = CONFIG.finale || {};
+    var card = $("today-card");
+    card.textContent = "";
+    card.classList.add("finale");
+    var stars = el("div", "finale-stars");
+    stars.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 12; i++) stars.appendChild(el("span", "finale-star", "★"));
+    card.appendChild(stars);
+    var text = el("div", "today-text");
+    text.appendChild(el("p", "today-kicker", "Alle 24 Türchen geschafft"));
+    text.appendChild(el("h2", "finale-title", f.title || "Herzlichen Glückwunsch!"));
+    text.appendChild(el("p", "finale-score", "Du hast " + sum.solved + " von 24 Wörtern erraten."));
+    text.appendChild(el("p", "finale-text", f.text || "Frohe Weihnachten!"));
+    if (f.signature) text.appendChild(el("p", "finale-signature", f.signature));
+    card.appendChild(text);
+  }
+
   // ---------- Spielansicht ----------
 
   var game = null; // { puzzle, guesses, current, busy }
@@ -272,8 +299,9 @@
   function openGame(day) {
     var p = puzzleFor(day);
     game = { puzzle: p, guesses: guessesFor(p), current: "", busy: false };
-    $("game-title").textContent = "Türchen " + day + " · " + day + ". Dezember";
-    $("game-topic").textContent = "Thema: " + p.topic;
+    $("game-title").textContent = "Türchen " + day + " · " + day + ". " + MONTH_NAME;
+    $("game-topic").textContent = CONFIG.showTopic && p.topic ? "Thema: " + p.topic : "";
+    $("game-topic").hidden = !(CONFIG.showTopic && p.topic);
     buildBoard();
     buildKeyboard();
     renderGame(false);
@@ -363,8 +391,8 @@
 
     var left = MAX - game.guesses.length;
     $("game-attempts").textContent = finished
-      ? (status === "won" ? "· Gelöst" : "· Aufgelöst")
-      : "· Noch " + left + (left === 1 ? " Versuch" : " Versuche");
+      ? (status === "won" ? "Gelöst" : "Aufgelöst")
+      : "Noch " + left + (left === 1 ? " Versuch" : " Versuche");
 
     // Tastatur einfärben
     var ks = L.keyboardStates(game.guesses, p.word);
@@ -441,7 +469,14 @@
       }
     }
     var nextLink = $("result-next");
-    if (next) {
+    var all = L.summary(progress, PUZZLES, MAX);
+    if (all.solved + all.lost === 24) {
+      nextLink.hidden = false;
+      nextLink.href = "#/";
+      nextLink.textContent = "Alle 24 geschafft: zum Abschluss";
+      nextLink.classList.remove("button-secondary");
+    } else if (next) {
+      nextLink.classList.add("button-secondary");
       nextLink.hidden = false;
       nextLink.href = "#/tag/" + next.day;
       nextLink.textContent = "Weiter mit Türchen " + next.day;
@@ -581,14 +616,18 @@
       renderHome();
       // Gesperrte Türchen sind auch per direktem Link nicht spielbar.
       history.replaceState(null, "", window.location.pathname + window.location.search + "#/");
-      toast(p ? "Geduld! Türchen " + day + " öffnet sich am " + day + ". Dezember." : "Dieses Türchen gibt es nicht.");
+      toast(p ? "Geduld! Türchen " + day + " öffnet sich am " + day + ". " + MONTH_NAME + "." : "Dieses Türchen gibt es nicht.");
       return;
     }
     var fromGame = game;
     game = null;
     showView("home");
     renderHome();
-    if (fromGame) {
+    if (fromGame && $("today-card").classList.contains("finale")) {
+      // Gerade das letzte Türchen beendet: Abschluss oben zeigen.
+      window.scrollTo(0, 0);
+      $("today-card").focus();
+    } else if (fromGame) {
       var door = $("calendar").children[fromGame.puzzle.day - 1];
       var link = door && door.querySelector("a");
       if (link) link.focus();

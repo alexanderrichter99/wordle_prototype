@@ -91,7 +91,7 @@ test("Datum in Europe/Berlin, unabhängig von UTC", () => {
   assert.deepEqual(L.dateInZone(new Date("2026-12-31T23:30:00Z"), "Europe/Berlin"), { year: 2027, month: 1, day: 1 });
 });
 
-test("Freischaltung je Datum", () => {
+test("Freischaltung je Datum (Dezember als Standard)", () => {
   const y = 2026;
   assert.equal(L.unlockedUpTo({ year: 2026, month: 11, day: 30 }, y), 0);
   assert.equal(L.unlockedUpTo({ year: 2026, month: 12, day: 1 }, y), 1);
@@ -103,6 +103,18 @@ test("Freischaltung je Datum", () => {
   assert.equal(L.isUnlocked(4, { year: 2026, month: 12, day: 4 }, y, false), true);
   assert.equal(L.isUnlocked(24, { year: 2026, month: 10, day: 23 }, y, true), true);
   assert.equal(L.isUnlocked(25, { year: 2026, month: 12, day: 30 }, y, true), false);
+});
+
+test("Freischaltung in einem anderen Aktionsmonat (Oktober)", () => {
+  const y = 2026, m = 10;
+  assert.equal(L.unlockedUpTo({ year: 2026, month: 9, day: 30 }, y, m), 0);
+  assert.equal(L.unlockedUpTo({ year: 2026, month: 10, day: 1 }, y, m), 1);
+  assert.equal(L.unlockedUpTo({ year: 2026, month: 10, day: 23 }, y, m), 23);
+  assert.equal(L.unlockedUpTo({ year: 2026, month: 10, day: 31 }, y, m), 24);
+  assert.equal(L.unlockedUpTo({ year: 2026, month: 12, day: 1 }, y, m), 24);
+  assert.equal(L.unlockedUpTo({ year: 2025, month: 10, day: 20 }, y, m), 0);
+  assert.equal(L.isUnlocked(23, { year: 2026, month: 10, day: 23 }, y, false, m), true);
+  assert.equal(L.isUnlocked(24, { year: 2026, month: 10, day: 23 }, y, false, m), false);
 });
 
 test("Testdatum wird streng geparst", () => {
@@ -186,4 +198,6 @@ test("Konfiguration: Testmodus ist bewusst einschaltbar und Werte sind plausibel
   assert.equal(typeof cfg.allowTestMode, "boolean");
   assert.ok(cfg.maxAttempts >= 1 && cfg.maxAttempts <= 10);
   assert.equal(cfg.timeZone, "Europe/Berlin");
+  assert.ok(cfg.month >= 1 && cfg.month <= 12);
+  assert.ok(cfg.finale && cfg.finale.title && cfg.finale.text, "Abschlusstext fehlt");
 });

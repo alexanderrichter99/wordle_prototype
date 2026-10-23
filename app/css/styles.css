@@ -68,7 +68,7 @@ a { color: var(--primary); }
 @media (prefers-color-scheme: dark) { a { color: #9cc3ef; } }
 
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-main:focus, #board:focus, .result:focus { outline: none; }
+main:focus, #board:focus, .result:focus, .today-card:focus { outline: none; }
 #board:focus-visible .row-current { outline: 2px solid color-mix(in srgb, var(--focus) 35%, transparent); outline-offset: 4px; border-radius: 6px; }
 
 .sr-only {
@@ -266,7 +266,7 @@ a.door:hover { transform: translateY(-2px); border-color: var(--primary); }
 .game-meta { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
 .topic {
   display: inline-block; padding: 1px 10px; border-radius: 99px; background: var(--surface-2);
-  color: var(--text); font-weight: 600; font-size: 13px;
+  color: var(--text); font-weight: 600; font-size: 13px; margin-right: 6px;
 }
 
 .board-wrap { position: relative; display: flex; justify-content: center; padding: 8px 0 16px; }
@@ -407,3 +407,93 @@ a.door:hover { transform: translateY(-2px); border-color: var(--primary); }
 }
 
 .door[data-status="new"] { box-shadow: inset 0 3px 0 var(--accent), var(--shadow); }
+
+/* ---------- Abschluss nach allen 24 Türchen ---------- */
+
+.today-card.finale {
+  position: relative; overflow: hidden; display: block; padding: 28px 24px 24px;
+  border-left-width: 1px; border-top: 5px solid var(--accent);
+}
+.finale .today-text { position: relative; max-width: 60ch; }
+.finale-title { font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 4px 0 8px; }
+.finale-score { font-weight: 600; margin: 0 0 8px !important; }
+.finale-text { margin: 0 0 12px !important; }
+.finale-signature { font-style: italic; color: var(--muted); }
+.finale-stars { position: absolute; inset: 0; pointer-events: none; }
+.finale-star {
+  position: absolute; color: var(--present); opacity: .18; font-size: 22px;
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+.finale-star:nth-child(1) { top: 10%; right: 6%; font-size: 34px; }
+.finale-star:nth-child(2) { top: 55%; right: 12%; animation-delay: .4s; }
+.finale-star:nth-child(3) { top: 25%; right: 22%; font-size: 16px; animation-delay: .8s; }
+.finale-star:nth-child(4) { top: 75%; right: 4%; font-size: 28px; animation-delay: 1.2s; }
+.finale-star:nth-child(5) { top: 8%; right: 34%; font-size: 14px; animation-delay: 1.6s; }
+.finale-star:nth-child(6) { top: 68%; right: 28%; font-size: 18px; animation-delay: 2s; }
+.finale-star:nth-child(7) { top: 40%; right: 2%; font-size: 12px; animation-delay: 2.4s; }
+.finale-star:nth-child(8) { top: 85%; right: 18%; font-size: 14px; animation-delay: .2s; }
+.finale-star:nth-child(9) { top: 18%; right: 46%; font-size: 12px; animation-delay: 1s; }
+.finale-star:nth-child(10) { top: 50%; right: 40%; font-size: 10px; animation-delay: 1.8s; }
+.finale-star:nth-child(11) { top: 88%; right: 42%; font-size: 16px; animation-delay: 2.8s; }
+.finale-star:nth-child(12) { top: 32%; right: 58%; font-size: 10px; animation-delay: .6s; }
+@keyframes twinkle { 0%, 100% { opacity: .12; transform: scale(.9); } 50% { opacity: .45; transform: scale(1.1); } }
+
+/* ---------- Erscheinungsbild „bayernlb“: sachlich, kantig, links ausgerichtet ---------- */
+
+:root[data-style="bayernlb"] {
+  --radius: 2px;
+  --font: "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-display: "Segoe UI", Arial, Helvetica, sans-serif;
+  --bg: #f3f5f7;
+  --surface-2: #e9eef3;
+  --border: #d5dde5;
+  --shadow: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-style="bayernlb"] { --bg: #0e1620; --surface-2: #1f2b38; --border: #2b3a4a; }
+}
+[data-style="bayernlb"] .site-header { background: var(--surface); color: var(--primary); border-bottom: 1px solid var(--border); }
+[data-style="bayernlb"] .header-stars { display: none; }
+[data-style="bayernlb"] .header-inner { padding-block: 18px; }
+[data-style="bayernlb"] .brand { color: var(--primary); }
+[data-style="bayernlb"] .brand-mark { display: none; }
+[data-style="bayernlb"] .brand-name { font-size: 1.4rem; font-weight: 700; letter-spacing: -.01em; }
+@media (prefers-color-scheme: dark) { [data-style="bayernlb"] .brand { color: var(--text); } }
+
+[data-style="bayernlb"] .hero {
+  text-align: left; margin: 24px 0 20px; padding: 32px 28px;
+  background: var(--primary); color: var(--on-primary);
+}
+[data-style="bayernlb"] .hero h1 { font-weight: 700; font-size: clamp(1.6rem, 4.5vw, 2.4rem); }
+[data-style="bayernlb"] .lead { color: var(--on-primary); opacity: .85; }
+[data-style="bayernlb"] h1, [data-style="bayernlb"] .game-title, [data-style="bayernlb"] .result h2, [data-style="bayernlb"] .finale-title { font-weight: 700; }
+
+[data-style="bayernlb"] .card, [data-style="bayernlb"] .today-card, [data-style="bayernlb"] .result,
+[data-style="bayernlb"] .fact, [data-style="bayernlb"] .back-link, [data-style="bayernlb"] .button,
+[data-style="bayernlb"] .banner { border-radius: var(--radius); }
+[data-style="bayernlb"] .today-card { border-left: 4px solid var(--accent); }
+[data-style="bayernlb"] .today-star { display: none; }
+[data-style="bayernlb"] .today-card.finale { border-left-width: 1px; }
+
+[data-style="bayernlb"] .section-title { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1.25rem; }
+[data-style="bayernlb"] .section-title::after { content: ""; display: block; width: 40px; height: 3px; background: var(--accent); margin-top: 8px; }
+
+[data-style="bayernlb"] .calendar { gap: 8px; }
+[data-style="bayernlb"] .door { border-radius: 0; padding: 12px 14px; }
+[data-style="bayernlb"] .door-number { font-weight: 700; color: var(--primary); font-size: clamp(1.5rem, 3.6vw, 2rem); }
+@media (prefers-color-scheme: dark) { [data-style="bayernlb"] .door-number { color: var(--text); } }
+[data-style="bayernlb"] .door[data-status="locked"] .door-number { color: var(--muted); }
+[data-style="bayernlb"] .door[data-status="won"] .door-number { color: var(--on-correct); }
+[data-style="bayernlb"] a.door:hover { transform: none; border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+[data-style="bayernlb"] .door[data-status="new"] { box-shadow: inset 0 3px 0 var(--accent); }
+[data-style="bayernlb"] .door-today { border: 2px solid var(--accent); }
+[data-style="bayernlb"] .door-today::after { color: var(--accent); }
+[data-style="bayernlb"] .door-today[data-status="new"] { animation: none; }
+
+[data-style="bayernlb"] .tile { border-radius: 2px; }
+[data-style="bayernlb"] .key { border-radius: 2px; }
+[data-style="bayernlb"] .progress-bar, [data-style="bayernlb"] .progress-fill { border-radius: 0; }
+[data-style="bayernlb"] .progress-fill { background: var(--accent); }
+[data-style="bayernlb"] .topic { border-radius: 2px; }
+[data-style="bayernlb"] .result { border-top-color: var(--accent); }
+[data-style="bayernlb"] .dist-fill { border-radius: 0; }
