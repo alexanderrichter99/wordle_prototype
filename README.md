@@ -14,10 +14,12 @@ Hintergrund und Architekturentscheidung: [docs/KONZEPT.md](docs/KONZEPT.md)
 - Wordle-Mechanik mit korrekter Behandlung doppelter Buchstaben, Umlaute Ä/Ö/Ü und ß
 - Bildschirmtastatur (QWERTZ) und physische Tastatur (Buchstaben, Enter, Rücktaste, Esc = zurück)
 - Farbrückmeldung zusätzlich mit Symbolen (✓ richtige Stelle, ↔ andere Stelle, ✕ nicht enthalten) und Textansagen für Screenreader
+- Schalter „Hoher Kontrast“ für Menschen mit Farbsehschwäche: Orange/Blau statt Grün/Gelb, kräftigere Ränder; die Wahl wird im Browser gemerkt und folgt ohne Wahl der Systemeinstellung „Mehr Kontrast“
+- Wörterbuchprüfung: Nur echte deutsche Wörter zählen als Versuch (siehe „Wörterbuch“)
 - Ergebnisansicht mit Lösungswort und Fun Fact (erst nach Abschluss sichtbar)
 - Fortschritt, Statistik und Verteilung der benötigten Versuche
 - Glückwunsch mit Weihnachtsgrüßen, sobald alle 24 Türchen gespielt sind
-- Zwei Erscheinungsbilder: `bayernlb` (sachlich, kantig, an den Webauftritt der BayernLB angelehnt) und `standard`
+- Zwei Erscheinungsbilder: `bayernlb` (sachlich, kantig, an den Webauftritt der BayernLB angelehnt, mit dezenten weihnachtlichen Akzenten in Gold: Schneefall und Tannenbaum im Kopfbereich, gesperrte Türchen als Geschenke, gelöste Türchen mit Stern) und `standard`
 - Spielstand im `localStorage`; funktioniert auch, wenn der Browser keine Speicherung erlaubt
 - Responsiv (Smartphone bis Desktop), Hell- und Dunkelmodus, reduzierte Animationen bei entsprechender Systemeinstellung
 - Testmodus zum Ausprobieren außerhalb der Adventszeit
@@ -30,6 +32,7 @@ app/                    ← nur dieser Ordner wird bereitgestellt
   css/styles.css
   js/config.js          ← Branding, Farben, Jahr, Versuche, Testmodus
   js/puzzles.js         ← die 24 Rätsel mit Thema und Fun Fact
+  js/words.js           ← Wörterbuch gültiger Rateversuche (generiert)
   js/logic.js           ← Spiellogik ohne DOM (getestet)
   js/app.js             ← Oberfläche
   assets/logo.svg       ← Platzhalter-Logo
@@ -38,6 +41,7 @@ docs/KONZEPT.md         ← Architektur, Datenschutz, Grenzen, offene Entscheidu
 tests/logic.test.js     ← Unit-Tests (Node, ohne Abhängigkeiten)
 tests/e2e/              ← Browser-Tests (Playwright, nur Entwicklung)
 tools/build-single.mjs  ← optional: alles in eine einzelne HTML-Datei bündeln
+tools/build-wordlist.py ← erzeugt js/words.js aus dem Hunspell-Wörterbuch
 ```
 
 ## Voraussetzungen
@@ -82,6 +86,7 @@ Alles Anpassbare steht in zwei Dateien:
 | `bankName`, `title`, `subtitle`, `footerNote` | Texte (`subtitle` leer = automatisch aus Monat) |
 | `logo` | Pfad zur Logo-Datei (SVG/PNG) oder `""` für ein Textlogo aus `bankName` |
 | `theme` | `"bayernlb"` (sachlich, kantig, links ausgerichtet) oder `"standard"` (weicher, festlicher) |
+| `colors.festive` | Weihnachtlicher Akzent (Gold) für Sterne, Baum, Schleifen |
 | `colors.primary`, `colors.accent` | Unternehmensfarben. Die eingetragenen BayernLB-Werte sind angelehnt und geschätzt; bitte durch die offiziellen Werte aus dem Corporate Design ersetzen |
 | `colors.correct`, `colors.present`, `colors.absent` | Farben der Rückmeldung (auf ausreichenden Kontrast achten) |
 | `year`, `month` | Jahr und Monat der Aktion (`12` = Dezember, `10` = Oktober-Probelauf). Jeder Monat hat einen eigenen Spielstand |
@@ -89,20 +94,35 @@ Alles Anpassbare steht in zwei Dateien:
 | `wordLength` | Erwartete Wortlänge; `null`, wenn Rätsel unterschiedlich lang sein sollen |
 | `showTopic` | Themenhinweis aus `puzzles.js` im Spiel anzeigen (Standard: `false`, damit er die Lösung nicht verrät) |
 | `finale.title`, `finale.text`, `finale.signature` | Glückwunschtext nach allen 24 Türchen |
-| `allowedWords` | Optional: Liste erlaubter Rateversuche; `null` = jede Buchstabenfolge |
+| `dictionary` | `true` = nur Wörter aus dem Wörterbuch zulassen, `false` = jede Buchstabenfolge |
+| `extraWords` | Zusätzlich erlaubte Wörter, die im Wörterbuch fehlen (die 24 Lösungen sind immer erlaubt) |
 | `allowTestMode` | Testmodus per URL erlauben |
 
 **`app/js/puzzles.js`**: ein Eintrag je Tag mit `word` (Großbuchstaben, Ä/Ö/Ü/ß erlaubt), `topic` (Kategorie für die Pflege, im Spiel nur mit `showTopic: true` sichtbar) und `fact` (nach dem Spiel sichtbar). Das Raster passt sich an die Länge des Lösungsworts an. Fehler in der Liste (fehlender Tag, doppeltes Wort, falsche Länge) zeigt die App beim Laden als roten Hinweis an, und `npm test` prüft sie ebenfalls.
 
 Die Rätsel eines Jahres sollten **vor dem 1. Dezember** feststehen. Wer ein Wort nachträglich ändert, macht bereits gespeicherte Versuche dieses Tages unbrauchbar (sie werden dann neu ausgewertet).
 
+## Wörterbuch
+
+Als Versuch zählen nur echte Wörter. Die Liste in `app/js/words.js` (4.555 Wörter mit fünf Buchstaben, ca. 28 KB) liegt lokal bei der App; es gibt keine Abfrage bei einem externen Dienst.
+
+- **Quelle:** deutsches Hunspell-Wörterbuch *igerman98* von Björn Jacke (de_DE, Version 20161207, https://www.j3e.de/ispell/igerman98/), bezogen über das npm-Paket `dictionary-de@3.0.0`. Dasselbe Wörterbuch nutzen LibreOffice und Firefox für die Rechtschreibprüfung.
+- **Umfang:** alle Grund- und Beugungsformen mit genau fünf Buchstaben (inkl. Ä, Ö, Ü, ß); Abkürzungen in Großbuchstaben sind ausgenommen.
+- **Lizenz:** GNU GPL Version 2 oder 3. Für eine rein interne Bereitstellung entstehen daraus keine praktischen Pflichten; wird die App weitergegeben, muss die Wortliste unter der GPL bleiben und der Lizenzhinweis mitgehen (steht im Kopf von `words.js`). **Bitte mit der zuständigen Stelle (Open-Source-Freigabe) abstimmen.** Alternativ lässt sich die Prüfung mit `dictionary: false` abschalten oder `words.js` durch eine andere Liste im gleichen Format ersetzen.
+- **Neu erzeugen** (z. B. für andere Wortlängen):
+  ```bash
+  npm pack dictionary-de@3.0.0 && tar xzf dictionary-de-3.0.0.tgz
+  python3 tools/build-wordlist.py package/index.dic package/index.aff --laengen 5
+  ```
+  Voraussetzung ist `unmunch` aus den Hunspell-Werkzeugen (Debian/Ubuntu: `apt install hunspell-tools`). Ein Unit-Test prüft, dass alle 24 Lösungswörter im Wörterbuch stehen.
+
 ## Tests
 
 ```bash
-npm test             # 19 Unit-Tests: Auswertung, doppelte Buchstaben, Umlaute/ß, Datum Europe/Berlin, Freischaltung, Speicherung, Rätselliste
+npm test             # 20 Unit-Tests: Auswertung, doppelte Buchstaben, Umlaute/ß, Datum Europe/Berlin, Freischaltung, Speicherung, Rätselliste
 npm install          # einmalig, nur für Browser-Tests
 npx playwright install chromium
-npm run test:e2e     # 9 Browser-Tests: Sperren inkl. Direktlink, Spielen per Tastatur und Bildschirmtastatur, Abschluss,
+npm run test:e2e     # 10 Browser-Tests: Wörterbuch, hoher Kontrast,: Sperren inkl. Direktlink, Spielen per Tastatur und Bildschirmtastatur, Abschluss,
                      # verborgenes Thema,
                      # Gewinnen/Verlieren, Wiederherstellung nach Neuladen, Zeitzone, ohne Speicher, Smartphone,
                      # keine externen Netzwerkzugriffe, keine JavaScript-Fehler
@@ -169,5 +189,5 @@ Geänderte Dateien (meist nur `js/puzzles.js` oder `js/config.js`) auf dem Webse
 
 - **Lösungen sind auslesbar:** Bei einer statischen App liegen alle Lösungswörter im ausgelieferten JavaScript. Die Oberfläche zeigt zukünftige Lösungen nie an, aber wer die Entwicklertools öffnet, kann sie finden. Für ein Spiel ohne Preise vertretbar; mit Gewinnspiel wäre eine serverseitige Prüfung nötig.
 - **Datum kommt vom Gerät:** Wer die Systemuhr verstellt, kann Türchen früher öffnen.
-- **Keine Wörterbuchprüfung:** Jede Buchstabenfolge in passender Länge wird akzeptiert. Eine eigene Liste lässt sich über `allowedWords` hinterlegen.
+- **Wörterbuch nicht vollständig:** Es enthält Grund- und Beugungsformen, aber keine frei zusammengesetzten Wörter und einige Eigennamen. Fehlende Wörter lassen sich über `extraWords` ergänzen.
 - **Sehr alte Browser** (Internet Explorer) werden nicht unterstützt.

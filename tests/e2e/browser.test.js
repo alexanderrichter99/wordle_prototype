@@ -82,12 +82,18 @@ test("Spielen per physischer Tastatur, Fehlermeldung, Gewinn und Wiederherstellu
   await page.keyboard.press("Backspace");
   await page.keyboard.press("Backspace");
 
-  await typeWord(page, "EEXXX");
-  assert.deepEqual(await tileStates(page, 1), ["present", "correct", "absent", "absent", "absent"]);
-  assert.match(await page.getAttribute("#board .row:nth-child(1)", "aria-label"), /E kommt vor, andere Stelle, E richtige Stelle/);
+  // Fantasiewort wird abgelehnt und kostet keinen Versuch
+  await typeWord(page, "knxzt");
+  assert.match(await page.textContent("#toast"), /steht nicht im Wörterbuch/);
+  assert.match(await page.textContent("#game-attempts"), /Noch 6 Versuche/);
+  for (let i = 0; i < 5; i++) await page.keyboard.press("Backspace");
+
+  await typeWord(page, "SEELE"); // KERZE: doppeltes E im Versuch und in der Lösung
+  assert.deepEqual(await tileStates(page, 1), ["absent", "correct", "absent", "absent", "correct"]);
+  assert.match(await page.getAttribute("#board .row:nth-child(1)", "aria-label"), /S nicht enthalten, E richtige Stelle, E nicht enthalten/);
   assert.match(await page.textContent("#game-attempts"), /Noch 5 Versuche/);
   assert.equal(await page.getAttribute('.key[data-key="E"]', "data-state"), "correct");
-  assert.equal(await page.getAttribute('.key[data-key="X"]', "data-state"), "absent");
+  assert.equal(await page.getAttribute('.key[data-key="S"]', "data-state"), "absent");
 
   await typeWord(page, "kerze");
   assert.equal(await page.isVisible("#result"), true);
@@ -115,7 +121,7 @@ test("Verlieren zeigt die Auflösung, Bildschirmtastatur funktioniert", opts, as
   const { context, page, errors } = await newPage();
   await page.goto(APP + "?test=1#/tag/1"); // KONTO
   for (let i = 0; i < 6; i++) {
-    for (const k of ["A", "B", "C", "D", "F"]) await page.click(`.key[data-key="${k}"]`);
+    for (const k of ["H", "U", "P", "E", "N"]) await page.click(`.key[data-key="${k}"]`);
     await page.click('.key[data-key="ENTER"]');
     await page.waitForTimeout(1400);
   }
@@ -221,6 +227,24 @@ test("Nach allen 24 Türchen erscheinen Glückwunsch und Weihnachtsgrüße", opt
   assert.match(text, /24 von 24 Wörtern erraten/);
   assert.match(text, /frohe Weihnachten/);
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, "abschluss.png") });
+  assert.deepEqual(errors, []);
+  await context.close();
+});
+
+test("Hoher Kontrast: umschaltbar, gespeichert, Spiel bleibt per Enter bedienbar", opts, async () => {
+  const { context, page, errors } = await newPage();
+  await page.goto(APP + "?test=1#/tag/2");
+  assert.equal(await page.getAttribute("html", "data-contrast"), "normal");
+  await page.click("#contrast-toggle");
+  assert.equal(await page.getAttribute("html", "data-contrast"), "hoch");
+  assert.equal(await page.getAttribute("#contrast-toggle", "aria-pressed"), "true");
+  await typeWord(page, "kranz"); // Enter muss den Versuch prüfen, nicht den Schalter erneut auslösen
+  assert.equal(await page.getAttribute("html", "data-contrast"), "hoch");
+  assert.deepEqual(await tileStates(page, 1), ["correct", "present", "absent", "absent", "present"]);
+  const bg = await page.$eval("#board .row:nth-child(1) .tile:nth-child(1)", (t) => getComputedStyle(t).backgroundColor);
+  assert.equal(bg, "rgb(230, 97, 0)"); // Orange statt Grün
+  await page.reload();
+  assert.equal(await page.getAttribute("html", "data-contrast"), "hoch");
   assert.deepEqual(errors, []);
   await context.close();
 });

@@ -14,8 +14,10 @@
   var MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   var MONTH_NAME = MONTH_NAMES[MONTH - 1];
   var MONTH_SHORT = MONTH_NAME.length > 4 ? MONTH_NAME.slice(0, 3) + "." : MONTH_NAME;
-  var ALLOWED = Array.isArray(CONFIG.allowedWords)
-    ? CONFIG.allowedWords.map(L.normalizeWord).filter(Boolean)
+  // Wörterbuchprüfung: nur echte Wörter (words.js) plus Lösungs- und Zusatzwörter.
+  // Fehlt words.js, wird jede Buchstabenfolge akzeptiert, damit das Spiel bedienbar bleibt.
+  var ALLOWED = CONFIG.dictionary !== false && window.ADVENT_WORDS
+    ? L.buildWordSet(window.ADVENT_WORDS, PUZZLES.map(function (p) { return p.word; }), CONFIG.extraWords)
     : null;
 
   var KEY_ROWS = [
@@ -100,6 +102,7 @@
     var c = CONFIG.colors || {};
     if (c.primary) root.setProperty("--primary", c.primary);
     if (c.accent) root.setProperty("--accent", c.accent);
+    if (c.festive) root.setProperty("--festive", c.festive);
     if (c.correct) root.setProperty("--correct", c.correct);
     if (c.present) root.setProperty("--present", c.present);
     if (c.absent) root.setProperty("--absent", c.absent);
@@ -145,6 +148,35 @@
     }
   }
 
+  // ---------- Hoher Kontrast ----------
+
+  // Farbenblind-freundliche Rückmeldefarben (Orange/Blau) und kräftigere Kontraste.
+  // Ohne gespeicherte Wahl folgt die Einstellung dem System (prefers-contrast: more).
+  var CONTRAST_KEY = "adventskalender-kontrast";
+
+  function savedContrast() {
+    try { return window.localStorage.getItem(CONTRAST_KEY); } catch (e) { return null; }
+  }
+
+  function applyContrast(on) {
+    document.documentElement.setAttribute("data-contrast", on ? "hoch" : "normal");
+    $("contrast-toggle").setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  function initContrast() {
+    var saved = savedContrast();
+    var prefers = window.matchMedia && window.matchMedia("(prefers-contrast: more)").matches;
+    applyContrast(saved ? saved === "hoch" : prefers);
+    $("contrast-toggle").addEventListener("click", function () {
+      var on = document.documentElement.getAttribute("data-contrast") !== "hoch";
+      applyContrast(on);
+      try { window.localStorage.setItem(CONTRAST_KEY, on ? "hoch" : "normal"); } catch (e) { /* ohne Speicher gilt die Wahl nur bis zum Neuladen */ }
+      toast(on ? "Hoher Kontrast ist an." : "Hoher Kontrast ist aus.");
+      // Im Spiel den Fokus zurück aufs Spielfeld, damit Enter wieder einen Versuch prüft.
+      if (game && !isFinished()) $("board").focus();
+    });
+  }
+
   // ---------- Startseite ----------
 
   function renderHome() {
@@ -178,7 +210,8 @@
       var label = el("span", "door-label");
       var aria = "Türchen " + day + ": ";
       if (!open) {
-        label.textContent = "🔒 " + day + ". " + MONTH_SHORT;
+        label.textContent = "🔒 ";
+        label.appendChild(el("span", "door-date", day + ". " + MONTH_SHORT));
         aria += "noch gesperrt, öffnet am " + day + ". " + MONTH_NAME;
         door.setAttribute("aria-disabled", "true");
         door.setAttribute("role", "img");
@@ -650,5 +683,6 @@
   document.addEventListener("visibilitychange", function () { if (!document.hidden) checkDayChange(); });
 
   applyBranding();
+  initContrast();
   route();
 })();

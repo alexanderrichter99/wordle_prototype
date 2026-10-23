@@ -51,7 +51,8 @@ Die Skripte sind bewusst klassische Skripte (keine ES-Module), damit die App auc
 - **Auswertung** in zwei Durchläufen: erst exakte Treffer (grün), dann vorhandene Buchstaben (gelb) nur so oft, wie sie im Lösungswort noch übrig sind. Doppelte Buchstaben werden dadurch korrekt behandelt.
 - **Umlaute und ß** sind eigene Buchstaben (Ä ≠ A). ß wird nicht zu „SS“ umgewandelt.
 - **Barrierearmut:** Zusätzlich zur Farbe zeigt jedes Feld ein Symbol (✓ richtige Stelle, ↔ falsche Stelle, · nicht enthalten), Screenreader erhalten eine Textansage je Versuch, alles ist per Tastatur bedienbar.
-- **Wortprüfung:** Standardmäßig wird jede Eingabe aus Buchstaben in passender Länge akzeptiert. Es gibt kein Wörterbuch (eine freie deutsche Wortliste in guter Qualität müsste lizenzrechtlich geprüft werden). Optional kann eine eigene Liste erlaubter Wörter hinterlegt werden (`config.js` → `allowedWords`).
+- **Wortprüfung:** Nur Wörter aus dem lokal ausgelieferten Wörterbuch (`js/words.js`, aus dem Hunspell-Wörterbuch igerman98, GPL-2.0/3.0) zählen als Versuch, wie beim Wordle der SZ. Unbekannte Wörter werden mit einer Meldung abgelehnt und kosten keinen Versuch. Die 24 Lösungswörter sind immer gültig; weitere Wörter über `extraWords`, Abschalten mit `dictionary: false`.
+- **Hoher Kontrast:** Schalter im Kopfbereich mit farbenblind-freundlichen Farben (Orange/Blau), kräftigeren Rändern und ohne Schneefall. Die Wahl liegt im `localStorage`; ohne Wahl gilt die Systemeinstellung `prefers-contrast: more`.
 
 ## Grenzen einer statischen Lösung
 
@@ -84,6 +85,6 @@ Diese Punkte beeinflussen die Umsetzung, sind aber mit Annahmen vorbelegt und in
 1. **Hosting-Weg** – hängt von der IT ab (siehe README, Abschnitt „Interne Bereitstellung“). Annahme: vorhandener interner Webserver.
 2. **Zeitraum** – vorbelegt mit Oktober 2026 als Probelauf; für die Aktion `month: 12`.
 3. **Wortlänge** – 5 Buchstaben, 6 Versuche. Jedes Rätsel kann eine eigene Länge haben; das Raster passt sich an.
-4. **Wortprüfung gegen Wörterbuch** – aus (jede Buchstabenfolge erlaubt). Mit eigener Liste aktivierbar.
+4. **Wörterbuch-Lizenz** – die Wortliste steht unter GPL-2.0/3.0; vor dem Einsatz mit der Open-Source-Freigabe abstimmen.
 5. **Corporate Design** – Erscheinungsbild an den Webauftritt der BayernLB angelehnt (Textlogo, geschätzte Farben, Systemschrift). Offizielles Logo, Farbwerte und ggf. Hausschrift (lokal eingebunden, ohne externe Quellen) kommen aus dem Corporate Design.
 6. **Gewinnspiel?** – Falls ja, ist ein Backend nötig (siehe „Grenzen“).

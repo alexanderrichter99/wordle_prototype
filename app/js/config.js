@@ -20,7 +20,8 @@ window.ADVENT_CONFIG = {
   // vor dem Einsatz durch die offiziellen Werte aus dem Corporate Design ersetzen.
   colors: {
     primary: "#00305e", // Hauptfarbe (Kopfzeile, Buttons, Überschriften)
-    accent: "#0a7cc1", // Akzent (Hervorhebungen, aktuelles Türchen)
+    accent: "#0a7cc1", // Akzent (Hervorhebungen, Fortschritt)
+    festive: "#c9a54e", // Weihnachtlicher Akzent (Sterne, Baum, heutiges Türchen)
     correct: "#1f7a4d", // Buchstabe an richtiger Stelle
     present: "#d4a72c", // Buchstabe kommt vor, falsche Stelle
     absent: "#6b7480" // Buchstabe kommt nicht vor
@@ -37,8 +38,12 @@ window.ADVENT_CONFIG = {
   wordLength: 5, // Erwartete Wortlänge; wird beim Laden gegen puzzles.js geprüft
   showTopic: false, // Themenhinweis (topic aus puzzles.js) im Spiel anzeigen
 
-  // Optionale Liste erlaubter Rateversuche (Großbuchstaben). null = jede Buchstabenfolge erlaubt.
-  allowedWords: null,
+  // Nur echte Wörter als Rateversuch zulassen (Wörterbuch in js/words.js).
+  // false = jede Buchstabenfolge passender Länge ist erlaubt.
+  dictionary: true,
+  // Zusätzlich erlaubte Wörter, die im Wörterbuch fehlen (Großbuchstaben), z. B. ["GIROS"].
+  // Die 24 Lösungswörter sind immer erlaubt.
+  extraWords: [],
 
   // Testmodus: ?test=1 öffnet alle Türchen, ?test=1&datum=2026-10-10 simuliert ein Datum.
   // Für den Produktivbetrieb auf false setzen.

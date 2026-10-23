@@ -5,6 +5,7 @@
 :root {
   --primary: #0b3d6b;
   --accent: #b8862b;
+  --festive: #c9a54e;
   --correct: #2e7d4f;
   --present: #c9a227;
   --absent: #6b7280;
@@ -497,3 +498,124 @@ a.door:hover { transform: translateY(-2px); border-color: var(--primary); }
 [data-style="bayernlb"] .topic { border-radius: 2px; }
 [data-style="bayernlb"] .result { border-top-color: var(--accent); }
 [data-style="bayernlb"] .dist-fill { border-radius: 0; }
+
+/* ---------- Weihnachtliche Akzente (beide Erscheinungsbilder) ---------- */
+
+.hero { position: relative; overflow: hidden; }
+.hero-text { position: relative; z-index: 1; }
+.hero-kicker { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--festive); }
+.hero-tree { display: none; }
+.tree-star { fill: var(--festive); }
+.tree-layer { fill: none; stroke: var(--festive); stroke-width: 2.5; stroke-linejoin: round; }
+.tree-trunk { fill: var(--festive); opacity: .7; }
+.tree-ball { fill: var(--festive); }
+.hero-snow { display: none; }
+
+/* Schneefall im Kopfbereich: zwei versetzte Ebenen aus kleinen Punkten */
+.hero-snow {
+  position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 90px 80px, #fff 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 150px 20px, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 60px 130px, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 190px 110px, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 120px 160px, #fff 50%, transparent 51%);
+  background-size: 220px 180px;
+  animation: snow 18s linear infinite;
+}
+@keyframes snow { from { background-position: 0 0; } to { background-position: 40px 180px; } }
+
+[data-style="bayernlb"] .hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  border-bottom: 4px solid var(--festive);
+  background-image: linear-gradient(120deg, var(--primary) 55%, color-mix(in srgb, var(--primary) 82%, #000));
+}
+[data-style="bayernlb"] .hero-snow { display: block; }
+[data-style="bayernlb"] .hero-tree { display: block; position: relative; z-index: 1; flex: none; width: 104px; height: auto; margin-right: 8px; }
+[data-style="bayernlb"] .hero-tree .tree-star { animation: shine 3s ease-in-out infinite; transform-origin: 60px 18px; }
+@keyframes shine { 0%, 100% { opacity: 1; } 50% { opacity: .65; } }
+@media (max-width: 520px) { [data-style="bayernlb"] .hero-tree { width: 64px; margin-right: 0; } }
+
+[data-style="bayernlb"] .site-header { border-bottom: 3px solid var(--festive); }
+[data-style="bayernlb"] .section-title::after { background: var(--festive); }
+[data-style="bayernlb"] .today-card { border-left-color: var(--festive); }
+[data-style="bayernlb"] .today-star { display: block; color: var(--festive); }
+[data-style="bayernlb"] .result, [data-style="bayernlb"] .today-card.finale { border-top-color: var(--festive); }
+[data-style="bayernlb"] .finale-star { color: var(--festive); }
+
+/* Gesperrte Türchen als verpackte Geschenke: Schleifenband in Gold */
+[data-style="bayernlb"] .door[data-status="locked"] {
+  background-color: var(--surface-2);
+  background-image:
+    linear-gradient(90deg, transparent calc(50% - 4px), color-mix(in srgb, var(--festive) 45%, transparent) calc(50% - 4px) calc(50% + 4px), transparent calc(50% + 4px)),
+    linear-gradient(180deg, transparent calc(50% - 4px), color-mix(in srgb, var(--festive) 45%, transparent) calc(50% - 4px) calc(50% + 4px), transparent calc(50% + 4px));
+}
+[data-style="bayernlb"] .door[data-status="locked"] .door-label { background: var(--surface-2); padding: 0 4px; margin-left: -4px; align-self: flex-start; }
+[data-style="bayernlb"] .door[data-status="locked"] .door-number { background: var(--surface-2); padding-right: 4px; align-self: flex-start; }
+
+/* Gelöste Türchen in Hausfarbe mit goldenem Stern */
+[data-style="bayernlb"] .door[data-status="won"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+[data-style="bayernlb"] .door[data-status="won"] .door-number, [data-style="bayernlb"] .door[data-status="won"] .door-label { color: var(--on-primary); }
+[data-style="bayernlb"] .door[data-status="won"]::before { content: "★"; position: absolute; right: 10px; top: 8px; font-size: 20px; line-height: 1; color: var(--festive); }
+[data-style="bayernlb"] .door-today[data-status="won"]::after { content: none; }
+@media (max-width: 760px) { .door-date { display: none; } }
+[data-style="bayernlb"] .door[data-status="new"] { box-shadow: inset 0 3px 0 var(--festive); }
+[data-style="bayernlb"] .door-today { border: 2px solid var(--festive); }
+[data-style="bayernlb"] .door-today::after { color: var(--festive); }
+[data-style="bayernlb"] a.door:hover { border-color: var(--festive); box-shadow: inset 0 -3px 0 var(--festive); }
+[data-style="bayernlb"] .progress-fill { background: linear-gradient(90deg, var(--primary), var(--festive)); }
+@media (prefers-color-scheme: dark) {
+  [data-style="bayernlb"] .door[data-status="won"] { background: color-mix(in srgb, var(--primary) 70%, #2c4c73); }
+}
+
+/* ---------- Hoher Kontrast (unterstützt bei Farbsehschwäche) ---------- */
+
+.header-inner { gap: 12px; }
+.contrast-toggle {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 12px;
+  border: 1px solid currentColor; border-radius: 99px; background: transparent; color: inherit;
+  font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.contrast-icon {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+.contrast-toggle[aria-pressed="true"] { background: var(--on-primary); color: var(--primary); }
+[data-style="bayernlb"] .contrast-toggle { border-radius: 2px; }
+[data-style="bayernlb"] .contrast-toggle[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+@media (max-width: 420px) { .contrast-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); } .contrast-toggle { padding: 6px 10px; } }
+
+.when-hc { display: none; }
+:root[data-contrast="hoch"] .when-hc { display: inline; }
+:root[data-contrast="hoch"] .when-normal { display: none; }
+
+/* Orange/Blau ist auch bei Rot-Grün-Sehschwäche gut unterscheidbar; dazu kräftigere Ränder und Texte. */
+:root[data-contrast="hoch"] {
+  --correct: #e66100 !important;
+  --present: #3a86ff !important;
+  --absent: #3c3f44 !important;
+  --on-correct: #000000;
+  --on-present: #000000;
+  --on-absent: #ffffff;
+  --muted: #2f3640;
+  --border: #59626e;
+  --tile-border: #1c232c;
+  --tile-filled: #000000;
+  --focus: #b3005f;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast="hoch"] { --muted: #d5dce4; --border: #9aa6b4; --tile-border: #c9d1da; --tile-filled: #ffffff; --absent: #4a4f57 !important; --focus: #ffd400; }
+}
+:root[data-contrast="hoch"] .tile { border-width: 3px; }
+:root[data-contrast="hoch"] .tile[data-state="correct"],
+:root[data-contrast="hoch"] .tile[data-state="present"],
+:root[data-contrast="hoch"] .tile[data-state="absent"] { border-color: var(--tile-border); }
+:root[data-contrast="hoch"] .tile-mark { font-size: max(12px, calc(var(--size) * .26)); }
+:root[data-contrast="hoch"] .tile[data-state="present"] { background-image: repeating-linear-gradient(135deg, transparent 0 5px, rgba(0, 0, 0, .18) 5px 8px); }
+:root[data-contrast="hoch"] .key[data-state="absent"] { opacity: 1; text-decoration: line-through; }
+:root[data-contrast="hoch"] .door { border-width: 2px; border-color: var(--border); }
+:root[data-contrast="hoch"] .door-label, :root[data-contrast="hoch"] .today-sub, :root[data-contrast="hoch"] .stat-label { color: var(--text); }
+:root[data-contrast="hoch"] :focus-visible { outline-width: 4px; }
+:root[data-contrast="hoch"] .hero-snow, :root[data-contrast="hoch"] .header-stars { display: none; }
