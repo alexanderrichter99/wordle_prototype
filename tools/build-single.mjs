@@ -31,6 +31,7 @@ replaceOnce('<link rel="stylesheet" href="css/styles.css">', `<style>\n${read("c
 replaceOnce('<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">', `<link rel="icon" href="${dataUri("assets/favicon.svg", "image/svg+xml")}">`);
 replaceOnce('<script src="js/config.js"></script>', inline(config));
 replaceOnce('<script src="js/puzzles.js"></script>', inline(read("js/puzzles.js")));
+replaceOnce('<script src="js/words.js"></script>', inline(read("js/words.js")));
 replaceOnce('<script src="js/logic.js"></script>', inline(read("js/logic.js")));
 replaceOnce('<script src="js/app.js"></script>', inline(read("js/app.js")));
 

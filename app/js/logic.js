@@ -78,7 +78,25 @@
     return states;
   }
 
-  // Prüft einen Versuch. Liefert null bei Erfolg, sonst eine verständliche Fehlermeldung.
+  /*
+   * Menge gültiger Rateversuche aus Wörterbuch (Text mit Leerzeichen getrennt),
+   * Lösungswörtern und Zusatzwörtern. Lösungswörter sind immer gültig.
+   */
+  function buildWordSet(dictionaryText, solutions, extraWords) {
+    var set = new Set();
+    String(dictionaryText || "").split(/\s+/).forEach(function (w) {
+      var n = normalizeWord(w);
+      if (n) set.add(n);
+    });
+    (solutions || []).concat(extraWords || []).forEach(function (w) {
+      var n = normalizeWord(w || "");
+      if (n) set.add(n);
+    });
+    return set;
+  }
+
+  // Prüft einen Versuch. allowedWords ist ein Set oder null (= jede Buchstabenfolge).
+  // Liefert null bei Erfolg, sonst eine verständliche Fehlermeldung.
   function validateGuess(guess, length, allowedWords) {
     var n = Array.from(guess).length;
     if (n === 0) return "Bitte gib zuerst ein Wort ein.";
@@ -89,7 +107,7 @@
     }
     if (n > length) return "Zu lang: Das Wort hat nur " + length + " Buchstaben.";
     if (normalizeWord(guess) !== guess) return "Bitte nur Buchstaben verwenden.";
-    if (allowedWords && allowedWords.indexOf(guess) === -1) return "Dieses Wort kennt der Kalender leider nicht.";
+    if (allowedWords && !allowedWords.has(guess)) return "„" + guess + "“ steht nicht im Wörterbuch. Bitte ein echtes Wort eingeben.";
     return null;
   }
 
@@ -238,6 +256,7 @@
     evaluateGuess: evaluateGuess,
     keyboardStates: keyboardStates,
     validateGuess: validateGuess,
+    buildWordSet: buildWordSet,
     dateInZone: dateInZone,
     parseIsoDate: parseIsoDate,
     unlockedUpTo: unlockedUpTo,

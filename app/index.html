@@ -19,6 +19,10 @@
         <span class="brand-mark" id="brand-mark" aria-hidden="true"></span>
         <span class="brand-name" id="brand-name"></span>
       </a>
+      <button type="button" class="contrast-toggle" id="contrast-toggle" aria-pressed="false">
+        <span class="contrast-icon" aria-hidden="true"></span>
+        <span class="contrast-text">Hoher Kontrast</span>
+      </button>
       <span class="header-stars" aria-hidden="true"></span>
     </div>
   </header>
@@ -33,8 +37,24 @@
     <!-- Startseite -->
     <section id="view-home" class="view" aria-labelledby="home-title">
       <div class="hero">
-        <h1 id="home-title"></h1>
-        <p class="lead" id="home-subtitle"></p>
+        <span class="hero-snow" aria-hidden="true"></span>
+        <div class="hero-text">
+          <p class="hero-kicker" aria-hidden="true">★ Advent, Advent</p>
+          <h1 id="home-title"></h1>
+          <p class="lead" id="home-subtitle"></p>
+        </div>
+        <svg class="hero-tree" viewBox="0 0 120 150" aria-hidden="true" focusable="false">
+          <path class="tree-star" d="M60 4l4.7 9.6 10.6 1.5-7.7 7.4 1.8 10.5L60 28l-9.4 5 1.8-10.5-7.7-7.4 10.6-1.5z"/>
+          <path class="tree-layer" d="M60 36L84 70H36z"/>
+          <path class="tree-layer" d="M60 56L94 100H26z"/>
+          <path class="tree-layer" d="M60 80L106 134H14z"/>
+          <rect class="tree-trunk" x="53" y="134" width="14" height="12"/>
+          <circle class="tree-ball" cx="52" cy="66" r="3"/>
+          <circle class="tree-ball" cx="70" cy="90" r="3.5"/>
+          <circle class="tree-ball" cx="44" cy="112" r="3.5"/>
+          <circle class="tree-ball" cx="78" cy="122" r="4"/>
+          <circle class="tree-ball" cx="62" cy="108" r="2.5"/>
+        </svg>
       </div>
 
       <div class="today-card" id="today-card" aria-live="polite" tabindex="-1"></div>
@@ -59,9 +79,9 @@
           <h2 id="howto-title">So wird gespielt</h2>
           <p>Errate das Lösungswort in <strong id="howto-attempts">6</strong> Versuchen. Jeder Versuch muss genau so viele Buchstaben haben wie das Rätsel Felder. Umlaute und ß zählen als eigene Buchstaben.</p>
           <ul class="legend">
-            <li><span class="tile tile-mini" data-state="correct"><span class="tile-letter">K</span><span class="tile-mark" aria-hidden="true"></span></span> <span><strong>Grün mit Häkchen:</strong> richtiger Buchstabe an der richtigen Stelle.</span></li>
-            <li><span class="tile tile-mini" data-state="present"><span class="tile-letter">O</span><span class="tile-mark" aria-hidden="true"></span></span> <span><strong>Gelb mit Pfeilen:</strong> kommt im Wort vor, aber an einer anderen Stelle.</span></li>
-            <li><span class="tile tile-mini" data-state="absent"><span class="tile-letter">X</span><span class="tile-mark" aria-hidden="true"></span></span> <span><strong>Grau mit Kreuz:</strong> kommt im Wort nicht (oder nicht noch einmal) vor.</span></li>
+            <li><span class="tile tile-mini" data-state="correct"><span class="tile-letter">K</span><span class="tile-mark" aria-hidden="true"></span></span> <span><strong><span class="when-normal">Grün</span><span class="when-hc">Orange</span> mit Häkchen:</strong> richtiger Buchstabe an der richtigen Stelle.</span></li>
+            <li><span class="tile tile-mini" data-state="present"><span class="tile-letter">O</span><span class="tile-mark" aria-hidden="true"></span></span> <span><strong><span class="when-normal">Gelb</span><span class="when-hc">Blau</span> mit Pfeilen:</strong> kommt im Wort vor, aber an einer anderen Stelle.</span></li>
+            <li><span class="tile tile-mini" data-state="absent"><span class="tile-letter">X</span><span class="tile-mark" aria-hidden="true"></span></span> <span><strong><span class="when-normal">Grau</span><span class="when-hc">Dunkelgrau</span> mit Kreuz:</strong> kommt im Wort nicht (oder nicht noch einmal) vor.</span></li>
           </ul>
           <p class="muted">Jeden Tag öffnet sich um Mitternacht ein neues Türchen. Verpasste Rätsel kannst du jederzeit nachholen.</p>
         </section>
@@ -119,6 +139,7 @@
 
   <script src="js/config.js"></script>
   <script src="js/puzzles.js"></script>
+  <script src="js/words.js"></script>
   <script src="js/logic.js"></script>
   <script src="js/app.js"></script>
 </body>

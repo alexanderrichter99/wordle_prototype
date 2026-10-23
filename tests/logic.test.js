@@ -79,7 +79,8 @@ test("Eingabeprüfung liefert verständliche Meldungen", () => {
   assert.match(L.validateGuess("KONT", 5), /fehlt noch 1 Buchstabe/);
   assert.equal(L.validateGuess("KONTO", 5), null);
   assert.equal(L.validateGuess("GRÜßE", 5), null);
-  assert.match(L.validateGuess("XXXXX", 5, ["KONTO"]), /kennt der Kalender/);
+  assert.match(L.validateGuess("XXXXX", 5, new Set(["KONTO"])), /„XXXXX“ steht nicht im Wörterbuch/);
+  assert.equal(L.validateGuess("KONTO", 5, new Set(["KONTO"])), null);
 });
 
 test("Datum in Europe/Berlin, unabhängig von UTC", () => {
@@ -200,4 +201,20 @@ test("Konfiguration: Testmodus ist bewusst einschaltbar und Werte sind plausibel
   assert.equal(cfg.timeZone, "Europe/Berlin");
   assert.ok(cfg.month >= 1 && cfg.month <= 12);
   assert.ok(cfg.finale && cfg.finale.title && cfg.finale.text, "Abschlusstext fehlt");
+});
+
+test("Wörterbuch: echte Wörter erlaubt, Fantasiewörter nicht, alle Lösungen gültig", () => {
+  const words = loadBrowserGlobals("words.js").ADVENT_WORDS;
+  const puzzles = loadBrowserGlobals("puzzles.js").ADVENT_PUZZLES;
+  const cfg = loadBrowserGlobals("config.js").ADVENT_CONFIG;
+  assert.equal(cfg.dictionary, true);
+  // Die Lösungen müssen schon im Wörterbuch selbst stehen, nicht nur über die Zusatzliste.
+  const dictOnly = L.buildWordSet(words, [], []);
+  puzzles.forEach((p) => assert.ok(dictOnly.has(p.word), p.word + " fehlt im Wörterbuch"));
+  ["HAUSE", "SAGTE", "ÄPFEL", "WEIßE", "SEELE", "HUPEN"].forEach((w) => assert.ok(dictOnly.has(w), w));
+  ["AAAAA", "KNXZT", "QWERT", "NATO"].forEach((w) => assert.ok(!dictOnly.has(w), w));
+  // Einträge sind normalisiert: Großbuchstaben, ß bleibt ß
+  assert.ok([...dictOnly].every((w) => w === L.normalizeWord(w)));
+  // Zusatzwörter werden aufgenommen
+  assert.ok(L.buildWordSet(words, [], ["girok"]).has("GIROK"));
 });
